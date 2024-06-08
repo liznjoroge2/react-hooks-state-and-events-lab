@@ -1,34 +1,33 @@
-import "@testing-library/jest-dom";
-import { render, screen, fireEvent } from "@testing-library/react";
-import ShoppingList from "../components/ShoppingList";
+import React, { useState } from 'react';
+import Item from './Item'; // Ensure the path to Item component is correct
 
-const testData = [
-  { id: 1, name: "Yogurt", category: "Dairy" },
-  { id: 2, name: "Pomegranate", category: "Produce" },
-  { id: 3, name: "Lettuce", category: "Produce" },
-  { id: 4, name: "String Cheese", category: "Dairy" },
-  { id: 5, name: "Cookies", category: "Dessert" },
-];
+function ShoppingList({ items }) {
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
-test("displays all items when initially rendered", () => {
-  const { container } = render(<ShoppingList items={testData} />);
-  expect(container.querySelector(".Items").children).toHaveLength(
-    testData.length
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+  };
+
+  const filteredItems = items.filter(item => 
+    selectedCategory === 'All' || item.category === selectedCategory
   );
-});
 
-test("displays only items that match the selected category", () => {
-  const { container } = render(<ShoppingList items={testData} />);
+  return (
+    <div>
+      <select onChange={handleCategoryChange} value={selectedCategory}>
+        <option value="All">All</option>
+        <option value="Dairy">Dairy</option>
+        <option value="Produce">Produce</option>
+        <option value="Dessert">Dessert</option>
+        {/* Add other categories as needed */}
+      </select>
+      <ul className="Items">
+        {filteredItems.map(item => (
+          <Item key={item.id} name={item.name} category={item.category} />
+        ))}
+      </ul>
+    </div>
+  );
+}
 
-  fireEvent.change(screen.getByRole("combobox"), {
-    target: { value: "Dairy" },
-  });
-
-  expect(container.querySelector(".Items").children).toHaveLength(2);
-
-  fireEvent.change(screen.getByRole("combobox"), {
-    target: { value: "Dessert" },
-  });
-
-  expect(container.querySelector(".Items").children).toHaveLength(1);
-});
+export default ShoppingList;
